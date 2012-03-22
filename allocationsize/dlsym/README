@@ -1,0 +1,3 @@
+g++ -o allocate allocate.c -lrt
+g++ -shared -ldl -fPIC mymalloc.c -o libmymalloc.so
+LD_PRELOAD=/home/andreif/allocator/allocationsize/dlsym/libmymalloc.so ./allocate
