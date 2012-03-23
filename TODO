@@ -1,6 +1,5 @@
 TODO:
 * think the stack trace testing through
-* have a Makefile/script run each of the scenarios X times and do the average
 * do this for different configurations, get data
 * output data in some nice way using graphviz
 * having the python script in each dir is silly, it only changes in one case
