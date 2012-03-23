@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -Wl,--wrap=malloc -Wl,--wrap=free
+CFLAGS = -Wall -O0 -Wl,--wrap=malloc -Wl,--wrap=free
 LDFLAGS = -lrt
 
 MAX_DEPTH = 8

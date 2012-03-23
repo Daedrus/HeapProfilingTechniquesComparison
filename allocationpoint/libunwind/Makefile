@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall
+CFLAGS = -Wall -O0
 LDFLAGS = -lrt -lunwind
 
 MAX_DEPTH = 8
