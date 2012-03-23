@@ -29,7 +29,7 @@ void add_node(unsigned long long size)
 	allocatedsize += malloc_usable_size(new_node->data);
 
 #ifdef DIRTY_ENABLED
-	for (unsigned long long i = 0; i < size; i+=pgsz-1) {
+	for (unsigned long long i = 0; i < size; i += pgsz) {
 		new_node->data[i] = 42;
 	}
 #endif
