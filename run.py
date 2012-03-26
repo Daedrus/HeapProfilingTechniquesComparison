@@ -1,5 +1,9 @@
 #!/usr/src/python
 
+import argparse
+
+import matplotlib.pyplot as plt
+
 from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
@@ -10,6 +14,8 @@ ALLOCATION_SIZE_SCENARIOS = [os.path.join("./allocationsize/", x) for x in os.li
 ALLOCATION_POINT_SCENARIOS = [os.path.join("./allocationpoint/", x) for x in os.listdir("./allocationpoint")]
 
 results=[]
+
+defines=''
 
 def setup():
 	print "Building basic scenario ..."
@@ -27,7 +33,7 @@ def run_scenario(scenario, times):
 	for i in range(0, times):
 		process=Popen(["make", "run", "-C", scenario], stdout=PIPE)
 		process.wait()
-		results[-1].append(process.communicate()[0].split('\n')[2])
+		results[-1].append(int(process.communicate()[0].split('\n')[2]))
 
 
 def run(times):
@@ -57,8 +63,25 @@ def clean():
 	for scenario in ALLOCATION_POINT_SCENARIOS:
 		call(["make", "clean", "-C", scenario])
 
+#parser = argparse.ArgumentParser()
+#parser.add_argument('--MAX_DEPTH', default=8)
+#parser.add_argument('--NR_ITERATIONS', default=1)
+#parser.add_argument('--START_SIZE', default='pgsz')
+#parser.add_argument('--END_SIZE', default='100*pgsz')
+#parser.add_argument('--STEP_SIZE', default='pgsz')
+
+#args=parser.parse_args()
+
 setup()
-run(10)
+run(20)
 clean()
 
-print results
+scenarios = [x[0] for x in results]
+
+print scenarios
+print [sum(x[1:])/(len(x)-1) for x in results]
+
+plt.plot([sum(x[1:])/(len(x)-1) for x in results], marker='o', linestyle='--', color='r')
+plt.xticks(range(len(scenarios)), scenarios, size='small', rotation=60)
+plt.show()
+
