@@ -15,19 +15,40 @@ ALLOCATION_POINT_SCENARIOS = [os.path.join("./allocationpoint/", x) for x in os.
 
 results=[]
 
-defines=''
+# From http://kogs-www.informatik.uni-hamburg.de/~meine/python_tricks
+def flatten(x):
+    """flatten(sequence) -> list
 
-def setup():
+    Returns a single, flat list which contains all elements retrieved
+    from the sequence and all recursively contained sub-sequences
+    (iterables).
+
+    Examples:
+    >>> [1, 2, [3,4], (5,6)]
+    [1, 2, [3, 4], (5, 6)]
+    >>> flatten([[[1,2,3], (42,None)], [4,5], [6], 7, MyVector(8,9,10)])
+    [1, 2, 3, 42, None, 4, 5, 6, 7, 8, 9, 10]"""
+
+    result = []
+    for el in x:
+        #if isinstance(el, (list, tuple)):
+        if hasattr(el, "__iter__") and not isinstance(el, basestring):
+            result.extend(flatten(el))
+        else:
+            result.append(el)
+    return result
+
+def setup(defines):
 	print "Building basic scenario ..."
-	call(["make", "-C", BASIC_SCENARIO])
+	call(flatten(["make", defines, "-C", BASIC_SCENARIO]))
 
 	print "Building allocation size scenarios ..."
 	for scenario in ALLOCATION_SIZE_SCENARIOS:
-		call(["make", "-C", scenario])
+		call(flatten(["make", defines, "-C", scenario]))
 
 	print "Building allocation point scenarios ..."
 	for scenario in ALLOCATION_POINT_SCENARIOS:
-		call(["make", "-C", scenario])
+		call(flatten(["make", defines, "-C", scenario]))
 
 def run_scenario(scenario, times):
 	for i in range(0, times):
@@ -63,25 +84,37 @@ def clean():
 	for scenario in ALLOCATION_POINT_SCENARIOS:
 		call(["make", "clean", "-C", scenario])
 
-#parser = argparse.ArgumentParser()
-#parser.add_argument('--MAX_DEPTH', default=8)
-#parser.add_argument('--NR_ITERATIONS', default=1)
-#parser.add_argument('--START_SIZE', default='pgsz')
-#parser.add_argument('--END_SIZE', default='100*pgsz')
-#parser.add_argument('--STEP_SIZE', default='pgsz')
+def run_test(max_depth, nr_iterations, start_size, end_size, step_size):
+	defines = []
+	defines.append('MAX_DEPTH=' + str(max_depth) + ' ')
+	defines.append('NR_ITERATIONS=' + str(nr_iterations) + ' ')
+	defines.append('START_SIZE=' + str(start_size) + ' ')
+	defines.append('END_SIZE=' + str(end_size) + ' ')
+	defines.append('STEP_SIZE=' + str(step_size) + ' ')
 
-#args=parser.parse_args()
+	#print defines.join()
 
-setup()
-run(20)
-clean()
+	setup(defines)
+	run(20)
+	clean()
 
-scenarios = [x[0] for x in results]
+def process_results():
+	scenarios = [x[0] for x in results]
 
-print scenarios
-print [sum(x[1:])/(len(x)-1) for x in results]
+	#print scenarios
+	print [sum(x[1:])/(len(x)-1) for x in results]
 
-plt.plot([sum(x[1:])/(len(x)-1) for x in results], marker='o', linestyle='--', color='r')
-plt.xticks(range(len(scenarios)), scenarios, size='small', rotation=60)
+	plt.plot([sum(x[1:])/(len(x)-1) for x in results], marker='o', linestyle='--', color='r')
+	plt.xticks(range(len(scenarios)), scenarios, size='small', rotation=60)
+
+
+# TEST CASE 1
+run_test(8, 1, 'pgsz', '100*pgsz', 'pgsz')
+process_results()
+
+# TEST CASE 2
+#run_test(8, 10000, 'pgsz', 'pgsz', 'pgsz')
+#process_results()
+
 plt.show()
 
