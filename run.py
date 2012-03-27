@@ -13,30 +13,19 @@ BASIC_SCENARIO = "./basic"
 ALLOCATION_SIZE_SCENARIOS = [os.path.join("./allocationsize/", x) for x in os.listdir("./allocationsize")]
 ALLOCATION_POINT_SCENARIOS = [os.path.join("./allocationpoint/", x) for x in os.listdir("./allocationpoint")]
 
+scenarios=[]
 results=[]
 
 # From http://kogs-www.informatik.uni-hamburg.de/~meine/python_tricks
 def flatten(x):
-    """flatten(sequence) -> list
-
-    Returns a single, flat list which contains all elements retrieved
-    from the sequence and all recursively contained sub-sequences
-    (iterables).
-
-    Examples:
-    >>> [1, 2, [3,4], (5,6)]
-    [1, 2, [3, 4], (5, 6)]
-    >>> flatten([[[1,2,3], (42,None)], [4,5], [6], 7, MyVector(8,9,10)])
-    [1, 2, 3, 42, None, 4, 5, 6, 7, 8, 9, 10]"""
-
-    result = []
-    for el in x:
-        #if isinstance(el, (list, tuple)):
-        if hasattr(el, "__iter__") and not isinstance(el, basestring):
-            result.extend(flatten(el))
-        else:
-            result.append(el)
-    return result
+	result = []
+	for el in x:
+		#if isinstance(el, (list, tuple)):
+		if hasattr(el, "__iter__") and not isinstance(el, basestring):
+			result.extend(flatten(el))
+		else:
+			result.append(el)
+	return result
 
 def setup(defines):
 	print "Building basic scenario ..."
@@ -54,10 +43,12 @@ def run_scenario(scenario, times):
 	for i in range(0, times):
 		process=Popen(["make", "run", "-C", scenario], stdout=PIPE)
 		process.wait()
-		results[-1].append(int(process.communicate()[0].split('\n')[2]))
+		results[-1].append(long(process.communicate()[0].split('\n')[2]))
 
 
 def run(times):
+	del results[:]
+
 	print "Running basic scenario", times, "times ..."
 	results.append([BASIC_SCENARIO])
 	run_scenario(BASIC_SCENARIO, times)
@@ -92,29 +83,30 @@ def run_test(max_depth, nr_iterations, start_size, end_size, step_size):
 	defines.append('END_SIZE=' + str(end_size) + ' ')
 	defines.append('STEP_SIZE=' + str(step_size) + ' ')
 
-	#print defines.join()
-
 	setup(defines)
 	run(20)
 	clean()
 
-def process_results():
-	scenarios = [x[0] for x in results]
+	process_results(nr_iterations)
 
-	#print scenarios
-	print [sum(x[1:])/(len(x)-1) for x in results]
+def process_results(nr_iterations):
+	averages = [sum(x[1:])/(len(x)-1) for x in results]
+	differences = [x - averages[0] for x in averages]
 
-	plt.plot([sum(x[1:])/(len(x)-1) for x in results], marker='o', linestyle='--', color='r')
-	plt.xticks(range(len(scenarios)), scenarios, size='small', rotation=60)
+	plt.plot(differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(100000), 0, 0], label=str(nr_iterations))
 
+plt.xlabel('test name')
+plt.ylabel('microseconds')
 
-# TEST CASE 1
-run_test(8, 1, 'pgsz', '100*pgsz', 'pgsz')
-process_results()
+scenarios = [BASIC_SCENARIO] + ALLOCATION_SIZE_SCENARIOS + ALLOCATION_POINT_SCENARIOS
+plt.xticks(range(len(scenarios)), scenarios, size='small', rotation=80)
 
-# TEST CASE 2
-#run_test(8, 10000, 'pgsz', 'pgsz', 'pgsz')
-#process_results()
+run_test(1, 20000, 'pgsz', 'pgsz', 'pgsz')
+run_test(1, 30000, 'pgsz', 'pgsz', 'pgsz')
+run_test(1, 40000, 'pgsz', 'pgsz', 'pgsz')
+run_test(1, 50000, 'pgsz', 'pgsz', 'pgsz')
+run_test(1, 60000, 'pgsz', 'pgsz', 'pgsz')
 
+plt.legend(title='allocations')
 plt.show()
 
