@@ -10,10 +10,9 @@ void* malloc(size_t size)
 	if (!real_malloc)
 		real_malloc = (void*(*)(size_t))dlsym(RTLD_NEXT, "malloc");
 
-	//allocatedsize += size;
+	allocatedsize += size;
 
 	//fprintf(stdout, "%lld\n", allocatedsize);
-	fprintf(stderr, "a\n");
 
 	void *p = real_malloc(size);
 
