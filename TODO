@@ -1,5 +1,3 @@
 TODO:
 * think the stack trace testing through
-* do this for different configurations, get data
-* output data in some nice way using graphviz
 * having the python script in each dir is silly, it only changes in one case
