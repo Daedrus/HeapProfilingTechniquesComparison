@@ -28,7 +28,7 @@ struct node *list;
 unsigned long long pgsz;
 
 struct node {
-	int *data;
+	char *data;
 	unsigned long long size;
 	struct node *next;
 };
@@ -36,7 +36,7 @@ struct node {
 void add_node(unsigned long long size)
 {
 	struct node *new_node = (struct node*)mymalloc(sizeof(struct node));
-	new_node->data = (int*)mymalloc(size * sizeof(int));
+	new_node->data = (char*)mymalloc(size);
 	new_node->size = size;
 	new_node->next = list;
 
