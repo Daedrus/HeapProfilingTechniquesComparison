@@ -7,6 +7,23 @@
 
 #include "allocate.h"
 
+#define LOG_ALLOCATION_POINT
+
+#ifdef LOG_ALLOCATION_POINT
+
+#define BUFFER_SIZE 100
+#define BUFFER_DEPTH 10
+
+struct frame {
+	struct frame* fr_savfp;
+	long fr_savpc;
+};
+
+long allocation_points[BUFFER_SIZE][BUFFER_DEPTH];
+unsigned int allocation_index = 0;
+
+#endif 
+
 unsigned long long allocatedsize;
 
 static void my_init_hook (void);
@@ -37,6 +54,20 @@ static void * my_malloc_hook (size_t size, const void *caller)
 
 	old_malloc_hook = __malloc_hook;
 	old_free_hook = __free_hook;
+
+#ifdef LOG_ALLOCATION_POINT
+	struct frame *frame;
+	struct frame *fp;
+	asm("movl %%ebp, %0" : "=r"(frame));
+	fp = frame;
+	unsigned int depth_index = 0;
+
+	for (; (!(fp < frame)) && depth_index < BUFFER_DEPTH;
+		fp = (struct frame *)((long) fp->fr_savfp)) {
+		allocation_points[allocation_index][depth_index] = fp->fr_savpc;
+		allocation_index = (allocation_index % (BUFFER_SIZE - 1)) + 1;
+	}
+#endif
 
 	allocatedsize += size;
 	//printf("%d %lld\n", size, allocatedsize);

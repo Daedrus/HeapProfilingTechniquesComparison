@@ -2,11 +2,11 @@ CC = g++
 CFLAGS = -Wall -O0
 LDFLAGS = -lrt
 
-MAX_DEPTH = 8
-NR_ITERATIONS = 1
-START_SIZE = pgsz
-END_SIZE = 100*pgsz
-STEP_SIZE = pgsz
+MAX_DEPTH = 1
+NR_ITERATIONS = 120000
+START_SIZE = 128
+END_SIZE = 128
+STEP_SIZE = 128
 
 allocate: allocate.c allocate.h
 	$(CC) -o $@ $< $(CFLAGS) $(LDFLAGS)
@@ -18,7 +18,7 @@ libmymalloc.so:
 	$(CC) -shared -ldl -fPIC mymalloc.c -o libmymalloc.so
 
 run:
-	LD_PRELOAD=./libmymalloc.so ./allocate
+	LD_PRELOAD="./libmymalloc.so" ./allocate
 
 .PHONY: clean
 clean:

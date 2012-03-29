@@ -93,7 +93,7 @@ def process_results(nr_iterations):
 	averages = [sum(x[1:])/(len(x)-1) for x in results]
 	differences = [x - averages[0] for x in averages]
 
-	plt.plot(differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(100000), 0, 0], label=str(nr_iterations))
+	plt.plot(differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
 
 plt.xlabel('test name')
 plt.ylabel('microseconds')
@@ -101,11 +101,11 @@ plt.ylabel('microseconds')
 scenarios = [BASIC_SCENARIO] + ALLOCATION_SIZE_SCENARIOS + ALLOCATION_POINT_SCENARIOS
 plt.xticks(range(len(scenarios)), scenarios, size='small', rotation=80)
 
-run_test(1, 20000, 'pgsz', 'pgsz', 'pgsz')
-run_test(1, 30000, 'pgsz', 'pgsz', 'pgsz')
-run_test(1, 40000, 'pgsz', 'pgsz', 'pgsz')
-run_test(1, 50000, 'pgsz', 'pgsz', 'pgsz')
-run_test(1, 60000, 'pgsz', 'pgsz', 'pgsz')
+run_test(1, 50000, 128, 128, 128)
+run_test(1, 100000, 128, 128, 128)
+run_test(1, 150000, 128, 128, 128)
+run_test(1, 200000, 128, 128, 128)
+run_test(1, 250000, 128, 128, 128)
 
 plt.legend(title='allocations')
 plt.show()
