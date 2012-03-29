@@ -56,13 +56,10 @@ static void * my_malloc_hook (size_t size, const void *caller)
 	old_free_hook = __free_hook;
 
 #ifdef LOG_ALLOCATION_POINT
-	struct frame *frame;
-	struct frame *fp;
-	asm("movl %%ebp, %0" : "=r"(frame));
-	fp = frame;
+	struct frame *frame = (struct frame *)__builtin_frame_address(0);
 	unsigned int depth_index = 0;
 
-	for (; (!(fp < frame)) && depth_index < BUFFER_DEPTH;
+	for (struct frame *fp = frame; (!(fp < frame)) && depth_index < BUFFER_DEPTH;
 		fp = (struct frame *)((long) fp->fr_savfp)) {
 		allocation_points[allocation_index][depth_index] = fp->fr_savpc;
 		allocation_index = (allocation_index % (BUFFER_SIZE - 1)) + 1;
