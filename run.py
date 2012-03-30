@@ -9,13 +9,18 @@ from subprocess import Popen
 from subprocess import PIPE
 import os
 
-BASIC_SCENARIO = "./basic"
-ALLOCATION_SIZE_SCENARIOS = [os.path.join("./allocationsize/", x) for x in os.listdir("./allocationsize")]
-ALLOCATION_POINT_SCENARIOS = [os.path.join("./allocationpoint/", x) for x in os.listdir("./allocationpoint")]
+class Scenario:
+	def __init__(self, name, path):
+		self.name = name
+		self.path = path
+		self.results = []
 
-allocation_size_scenarios = [BASIC_SCENARIO] + ALLOCATION_SIZE_SCENARIOS
-allocation_point_scenarios = [BASIC_SCENARIO] + ALLOCATION_POINT_SCENARIOS
-results=[]
+	def __str__(self):
+		return self.name + ", " + self.path
+
+basic_scenario = Scenario("basic", "./basic")
+allocation_size_scenarios = [Scenario(x, os.path.join("./allocationsize/", x)) for x in os.listdir("./allocationsize")]
+allocation_point_scenarios = [Scenario(x, os.path.join("./allocationpoint/", x)) for x in os.listdir("./allocationpoint")]
 
 # From http://kogs-www.informatik.uni-hamburg.de/~meine/python_tricks
 def flatten(x):
@@ -30,51 +35,45 @@ def flatten(x):
 
 def setup(defines):
 	print "Building basic scenario ..."
-	call(flatten(["make", defines, "-C", BASIC_SCENARIO]))
+	call(flatten(["make", defines, "-C", basic_scenario.path]))
 
 	print "Building allocation size scenarios ..."
-	for scenario in ALLOCATION_SIZE_SCENARIOS:
-		call(flatten(["make", defines, "-C", scenario]))
+	for scenario in allocation_size_scenarios:
+		call(flatten(["make", defines, "-C", scenario.path]))
 
 	print "Building allocation point scenarios ..."
-	for scenario in ALLOCATION_POINT_SCENARIOS:
-		call(flatten(["make", defines, "-C", scenario]))
+	for scenario in allocation_point_scenarios:
+		call(flatten(["make", defines, "-C", scenario.path]))
 
 def run_scenario(scenario, times):
 	for i in range(0, times):
-		process=Popen(["make", "run", "-C", scenario], stdout=PIPE)
+		process=Popen(["make", "run", "-C", scenario.path], stdout=PIPE)
 		process.wait()
-		results[-1].append(long(process.communicate()[0].split('\n')[2]))
-
+		scenario.results.append(long(process.communicate()[0].split('\n')[2]))
 
 def run(times):
-	del results[:]
-
 	print "Running basic scenario", times, "times ..."
-	results.append([BASIC_SCENARIO])
-	run_scenario(BASIC_SCENARIO, times)
+	run_scenario(basic_scenario, times)
 
 	print "Running allocation size scenarios", times, "times ..."
-	for scenario in ALLOCATION_SIZE_SCENARIOS:
-		results.append([scenario])
+	for scenario in allocation_size_scenarios:
 		run_scenario(scenario, times)
 
 	print "Running allocation point scenarios", times, "times ..."
-	for scenario in ALLOCATION_POINT_SCENARIOS:
-		results.append([scenario])
+	for scenario in allocation_point_scenarios:
 		run_scenario(scenario, times)
 
 def clean():
 	print "Cleaning basic scenario ..."
-	call(["make", "clean", "-C", BASIC_SCENARIO])
+	call(["make", "clean", "-C", basic_scenario.path])
 
 	print "Cleaning allocation size scenarios ..."
-	for scenario in ALLOCATION_SIZE_SCENARIOS:
-		call(["make", "clean", "-C", scenario])
+	for scenario in allocation_size_scenarios:
+		call(["make", "clean", "-C", scenario.path])
 
 	print "Cleaning allocation point scenarios ..."
-	for scenario in ALLOCATION_POINT_SCENARIOS:
-		call(["make", "clean", "-C", scenario])
+	for scenario in allocation_point_scenarios:
+		call(["make", "clean", "-C", scenario.path])
 
 def run_test(max_depth, nr_iterations, start_size, end_size, step_size):
 	defines = []
@@ -91,23 +90,36 @@ def run_test(max_depth, nr_iterations, start_size, end_size, step_size):
 	process_results(nr_iterations)
 
 def process_results(nr_iterations):
-	averages = [sum(x[1:])/(len(x)-1) for x in results]
-	differences = [x - averages[0] for x in averages]
+	allocation_size_results = []
+	allocation_size_results.append(basic_scenario.results)
+	for scenario in allocation_size_scenarios:
+		allocation_size_results.append(scenario.results)
+
+	allocation_point_results = []
+	allocation_point_results.append(basic_scenario.results)
+	for scenario in allocation_point_scenarios:
+		allocation_point_results.append(scenario.results)
+
+	allocation_size_averages = [sum(x[1:])/(len(x)-1) for x in allocation_size_results]
+	allocation_point_averages = [sum(x[1:])/(len(x)-1) for x in allocation_point_results]
+
+	allocation_size_differences = [x - allocation_size_averages[0] for x in allocation_size_averages]
+	allocation_point_differences = [x - allocation_point_averages[0] for x in allocation_point_averages]
 
 	plt.subplot(211)
-	plt.plot(differences[:len(allocation_size_scenarios)], marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
+	plt.plot(allocation_size_differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
 	plt.subplot(212)
-	plt.plot([differences[0]] + differences[-(len(allocation_point_scenarios) - 1):], marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
+	plt.plot(allocation_point_differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
 
 plt.figure(1)
-plt.subplot(211)
+plot1 = plt.subplot(211)
 plt.xlabel('test name')
 plt.ylabel('microseconds')
-plt.xticks(range(len(allocation_size_scenarios)), allocation_size_scenarios, size='small', rotation=80)
-plt.subplot(212)
+plt.xticks(range(len(allocation_size_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_size_scenarios], size='small')
+plot2 = plt.subplot(212)
 plt.xlabel('test name')
 plt.ylabel('microseconds')
-plt.xticks(range(len(allocation_point_scenarios)), allocation_point_scenarios, size='small', rotation=80)
+plt.xticks(range(len(allocation_point_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_point_scenarios], size='small')
 
 run_test(1, 50000, 128, 128, 128)
 run_test(1, 100000, 128, 128, 128)
@@ -115,6 +127,6 @@ run_test(1, 150000, 128, 128, 128)
 run_test(1, 200000, 128, 128, 128)
 run_test(1, 250000, 128, 128, 128)
 
-plt.legend(title='allocations')
+plt.legend(loc='upper center', bbox_to_anchor=(0.5, 0.5), fancybox=True, shadow=True, title='allocations')
 plt.show()
 
