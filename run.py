@@ -94,13 +94,10 @@ def process_results(nr_iterations):
 	averages = [sum(x[1:])/(len(x)-1) for x in results]
 	differences = [x - averages[0] for x in averages]
 
-	print differences
-
 	plt.subplot(211)
 	plt.plot(differences[:len(allocation_size_scenarios)], marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
 	plt.subplot(212)
-	plt.plot(differences[-len(allocation_point_scenarios):], marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
-
+	plt.plot([differences[0]] + differences[-(len(allocation_point_scenarios) - 1):], marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
 
 plt.figure(1)
 plt.subplot(211)
