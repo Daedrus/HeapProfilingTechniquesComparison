@@ -13,7 +13,8 @@ BASIC_SCENARIO = "./basic"
 ALLOCATION_SIZE_SCENARIOS = [os.path.join("./allocationsize/", x) for x in os.listdir("./allocationsize")]
 ALLOCATION_POINT_SCENARIOS = [os.path.join("./allocationpoint/", x) for x in os.listdir("./allocationpoint")]
 
-scenarios=[]
+allocation_size_scenarios = [BASIC_SCENARIO] + ALLOCATION_SIZE_SCENARIOS
+allocation_point_scenarios = [BASIC_SCENARIO] + ALLOCATION_POINT_SCENARIOS
 results=[]
 
 # From http://kogs-www.informatik.uni-hamburg.de/~meine/python_tricks
@@ -93,13 +94,23 @@ def process_results(nr_iterations):
 	averages = [sum(x[1:])/(len(x)-1) for x in results]
 	differences = [x - averages[0] for x in averages]
 
-	plt.plot(differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
+	print differences
 
+	plt.subplot(211)
+	plt.plot(differences[:len(allocation_size_scenarios)], marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
+	plt.subplot(212)
+	plt.plot(differences[-len(allocation_point_scenarios):], marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
+
+
+plt.figure(1)
+plt.subplot(211)
 plt.xlabel('test name')
 plt.ylabel('microseconds')
-
-scenarios = [BASIC_SCENARIO] + ALLOCATION_SIZE_SCENARIOS + ALLOCATION_POINT_SCENARIOS
-plt.xticks(range(len(scenarios)), scenarios, size='small', rotation=80)
+plt.xticks(range(len(allocation_size_scenarios)), allocation_size_scenarios, size='small', rotation=80)
+plt.subplot(212)
+plt.xlabel('test name')
+plt.ylabel('microseconds')
+plt.xticks(range(len(allocation_point_scenarios)), allocation_point_scenarios, size='small', rotation=80)
 
 run_test(1, 50000, 128, 128, 128)
 run_test(1, 100000, 128, 128, 128)
