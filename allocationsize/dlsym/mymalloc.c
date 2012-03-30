@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdint.h>
 #include <dlfcn.h>
@@ -40,7 +41,7 @@ void* malloc(size_t size)
 
 	allocatedsize += size;
 
-	//fprintf(stdout, "%lld\n", allocatedsize);
+	//printf("%lld\n", allocatedsize);
 
 	void *p = real_malloc(size);
 

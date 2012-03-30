@@ -15,7 +15,7 @@ allocate.h: libmymalloc.so
 	python allocgen.py $(MAX_DEPTH) $(NR_ITERATIONS) $(START_SIZE) $(END_SIZE) $(STEP_SIZE) > allocate.h
 
 libmymalloc.so:
-	$(CC) -shared -ldl -fPIC mymalloc.c -o libmymalloc.so
+	gcc -std=c99 -shared -fPIC mymalloc.c -o libmymalloc.so -ldl
 
 run:
 	LD_PRELOAD="./libmymalloc.so" ./allocate
