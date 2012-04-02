@@ -1,4 +1,5 @@
 TODO:
+* add free()s to the tests
 * refactor code so that recompilation is not required
 * think the stack trace testing through
 * having the python script in each dir is silly, it only changes in one case
