@@ -24,9 +24,9 @@ struct node {
 void add_node(unsigned long long size)
 {
 	struct node *new_node = (struct node*)malloc(sizeof(struct node));
-	logger->getCurrentFunction();
+	logger->walkStack();
 	new_node->data = (char*)malloc(size);
-	logger->getCurrentFunction();
+	logger->walkStack();
 	new_node->size = size;
 	new_node->next = list;
 
@@ -41,14 +41,13 @@ void add_node(unsigned long long size)
 
 void allocate()
 {
-	for (int i = 0; i < MAX_DEPTH; i++) {
-		for (int j = 0; j < NR_ITERATIONS; j++) {
-			for (unsigned long long size = START_SIZE; size <= END_SIZE; size+=STEP_SIZE) {
-				funcs[i](size);
-			}
+	for (int j = 0; j < NR_ITERATIONS; j++) {
+		for (unsigned long long size = START_SIZE; size <= END_SIZE; size+=STEP_SIZE) {
+			funcs[MAX_DEPTH-1](size);
 		}
 	}
 }
+
 void print_list()
 {
 	struct node *it = list;
