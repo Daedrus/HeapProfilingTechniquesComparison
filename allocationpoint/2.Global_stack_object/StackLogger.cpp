@@ -28,3 +28,10 @@ const void* StackLogger::getCurrentFunction()
 	else
 		return 0;
 }
+
+const void StackLogger::walkStack()
+{
+	const void* tmp;
+	for (int i = 0; i < m_currpos; i++)
+		tmp = stack[i];
+}

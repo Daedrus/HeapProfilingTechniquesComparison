@@ -16,6 +16,8 @@ public:
 	void enterFunction(const void*);
 	void leaveFunction();
 	const void* getCurrentFunction();
+
+	const void walkStack();
 };
 
 extern StackLogger* logger;
