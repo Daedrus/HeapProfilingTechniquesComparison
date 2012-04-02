@@ -4,26 +4,32 @@
 #include <time.h>
 #include <malloc.h>
 
-#define UNW_LOCAL_ONLY
-#include <libunwind.h>
-
 #include "allocate.h"
+
+#define BUFFER_SIZE 100
+#define BUFFER_DEPTH 10
+
+struct frame {
+	struct frame* fr_savfp;
+	long fr_savpc;
+};
+
+long allocation_points[BUFFER_SIZE][BUFFER_DEPTH];
+unsigned int allocation_index = 0;
 
 struct node *list;
 
 unsigned long long pgsz;
 
-void show_backtrace (void) {
-  unw_cursor_t cursor; unw_context_t uc;
-  unw_word_t ip, sp;
+void save_backtrace (void) {
+	struct frame *frame = (struct frame *)__builtin_frame_address(0);
+	unsigned int depth_index = 0;
 
-  unw_getcontext(&uc);
-  unw_init_local(&cursor, &uc);
-  //while (unw_step(&cursor) > 0) {
-    unw_get_reg(&cursor, UNW_REG_IP, &ip);
-    unw_get_reg(&cursor, UNW_REG_SP, &sp);
-    //printf ("ip = %lx, sp = %lx\n", (long) ip, (long) sp);
-  //}
+	for (struct frame *fp = frame; (!(fp < frame)) && depth_index < BUFFER_DEPTH;
+		fp = (struct frame *)((long) fp->fr_savfp)) {
+		allocation_points[allocation_index][depth_index] = fp->fr_savpc;
+		allocation_index = (allocation_index % (BUFFER_SIZE - 1)) + 1;
+	}
 }
 
 struct node {
@@ -35,9 +41,9 @@ struct node {
 void add_node(unsigned long long size)
 {
 	struct node *new_node = (struct node*)malloc(sizeof(struct node));
-	show_backtrace();
+	save_backtrace();
 	new_node->data = (char*)malloc(size);
-	show_backtrace();
+	save_backtrace();
 	new_node->size = size;
 	new_node->next = list;
 

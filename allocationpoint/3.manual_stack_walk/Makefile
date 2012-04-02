@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -Wall -O0
-LDFLAGS = -lrt -lunwind
+LDFLAGS = -lrt
 
 MAX_DEPTH = 8
 NR_ITERATIONS = 1
