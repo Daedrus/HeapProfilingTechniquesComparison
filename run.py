@@ -18,9 +18,9 @@ class Scenario:
 	def __str__(self):
 		return self.name + ", " + self.path
 
-basic_scenario = Scenario("basic", "./basic")
-allocation_size_scenarios = [Scenario(x, os.path.join("./allocationsize/", x)) for x in os.listdir("./allocationsize")]
-allocation_point_scenarios = [Scenario(x, os.path.join("./allocationpoint/", x)) for x in os.listdir("./allocationpoint")]
+basic_scenario = Scenario("0.basic", "./basic")
+allocation_size_scenarios = sorted([Scenario(x, os.path.join("./allocationsize/", x)) for x in os.listdir("./allocationsize")], key=lambda scenario: scenario.name)
+allocation_point_scenarios = sorted([Scenario(x, os.path.join("./allocationpoint/", x)) for x in os.listdir("./allocationpoint")], key=lambda scenario: scenario.name)
 
 # From http://kogs-www.informatik.uni-hamburg.de/~meine/python_tricks
 def flatten(x):
@@ -113,13 +113,12 @@ def process_results(nr_iterations):
 
 plt.figure(1)
 plot1 = plt.subplot(211)
-plt.xlabel('test name')
 plt.ylabel('microseconds')
-plt.xticks(range(len(allocation_size_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_size_scenarios], size='small')
+plt.xticks(range(len(allocation_size_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_size_scenarios], size='large')
 plot2 = plt.subplot(212)
 plt.xlabel('test name')
 plt.ylabel('microseconds')
-plt.xticks(range(len(allocation_point_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_point_scenarios], size='small')
+plt.xticks(range(len(allocation_point_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_point_scenarios], size='large')
 
 run_test(1, 50000, 128, 128, 128)
 run_test(1, 100000, 128, 128, 128)
@@ -127,6 +126,6 @@ run_test(1, 150000, 128, 128, 128)
 run_test(1, 200000, 128, 128, 128)
 run_test(1, 250000, 128, 128, 128)
 
-plt.legend(loc='upper center', bbox_to_anchor=(0.5, 0.5), fancybox=True, shadow=True, title='allocations')
+plt.legend(loc='upper center', fancybox=True, shadow=True, title='allocations')
 plt.show()
 
