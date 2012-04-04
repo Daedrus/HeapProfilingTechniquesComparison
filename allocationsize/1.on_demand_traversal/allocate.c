@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 	allocate();
-	//get_list_size();
+	get_list_size();
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
 	diff.tv_sec = end.tv_sec - start.tv_sec;
