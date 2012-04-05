@@ -48,3 +48,13 @@ void* malloc(size_t size)
 	return p;
 }
 
+/*
+void free(void *ptr)
+{
+	static void (*real_free)(void*) = NULL;
+	if (!real_free)
+		real_free = (void(*)(void*))dlsym(RTLD_NEXT, "malloc");
+
+	real_free(ptr);
+}
+*/

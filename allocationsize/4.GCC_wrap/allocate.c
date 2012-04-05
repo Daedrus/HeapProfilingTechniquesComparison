@@ -26,6 +26,7 @@ unsigned int allocation_index = 0;
 
 
 unsigned long long allocatedsize;
+unsigned long long counter;
 
 extern "C" void *__real_malloc(size_t size);
 extern "C" void __real_free(void *ptr);
@@ -52,6 +53,8 @@ extern "C" void *__wrap_malloc(size_t size)
 
 extern "C" void __wrap_free(void *ptr)
 {
+	// Obtain ptr size
+	// Decrease size from allocatedsize
 	__real_free(ptr);
 }
 
@@ -77,6 +80,11 @@ void add_node(unsigned long long size)
 		new_node->data[i] = 42;
 	}
 #endif
+
+	if ((counter++) % 2) {
+		free(new_node->data);
+		new_node->data = NULL;
+	}
 
 	list = new_node;
 }
@@ -109,6 +117,7 @@ int main(int argc, char **argv)
 	pgsz = sysconf(_SC_PAGESIZE);
 
 	allocatedsize = 0;
+	counter = 0;
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 	allocate();

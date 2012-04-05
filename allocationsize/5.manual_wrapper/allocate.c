@@ -25,6 +25,7 @@ unsigned int allocation_index = 0;
 #endif 
 
 unsigned long long allocatedsize;
+unsigned long long counter;
 
 void *mymalloc(size_t size)
 {
@@ -73,6 +74,11 @@ void add_node(unsigned long long size)
 		new_node->data[i] = 42;
 	}
 #endif
+
+	if ((counter++) % 2) {
+		free(new_node->data);
+		new_node->data = NULL;
+	}
 
 	list = new_node;
 }

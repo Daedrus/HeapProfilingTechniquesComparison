@@ -8,6 +8,7 @@
 #include "allocate.h"
 
 unsigned long long allocatedsize;
+unsigned long long counter;
 
 struct node *list;
 
@@ -31,6 +32,11 @@ void add_node(unsigned long long size)
 		new_node->data[i] = 42;
 	}
 #endif
+
+	if ((counter++) % 2) {
+		free(new_node->data);
+		new_node->data = NULL;
+	}
 
 	list = new_node;
 }
@@ -74,6 +80,7 @@ int main(int argc, char **argv)
 	pgsz = sysconf(_SC_PAGESIZE);
 
 	allocatedsize = 0;
+	counter = 0;
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 	allocate();

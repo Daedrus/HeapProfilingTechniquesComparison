@@ -25,6 +25,7 @@ unsigned int allocation_index = 0;
 #endif 
 
 unsigned long long allocatedsize;
+unsigned long long counter;
 
 static void my_init_hook (void);
 static void *my_malloc_hook (size_t, const void *);
@@ -112,6 +113,11 @@ void add_node(unsigned long long size)
 	}
 #endif
 
+	if ((counter++) % 2) {
+		free(new_node->data);
+		new_node->data = NULL;
+	}
+
 	list = new_node;
 }
 
@@ -143,6 +149,7 @@ int main(int argc, char **argv)
 	pgsz = sysconf(_SC_PAGESIZE);
 
 	allocatedsize = 0;
+	counter = 0;
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 	allocate();
