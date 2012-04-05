@@ -20,6 +20,7 @@ unsigned int allocation_index = 0;
 struct node *list;
 
 unsigned long long pgsz;
+unsigned long long counter;
 
 void save_backtrace (void) {
 	struct frame *frame = (struct frame *)__builtin_frame_address(0);
@@ -53,6 +54,11 @@ void add_node(unsigned long long size)
 	}
 #endif
 
+	if ((counter++) % 2) {
+		free(new_node->data);
+		new_node->data = NULL;
+	}
+
 	list = new_node;
 }
 
@@ -82,6 +88,8 @@ int main(int argc, char **argv)
 	list = NULL;
 
 	pgsz = sysconf(_SC_PAGESIZE);
+
+	counter = 0;
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 	allocate();

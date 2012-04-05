@@ -21,6 +21,8 @@ struct node {
 	struct node *next;
 };
 
+unsigned long long counter;
+
 void add_node(unsigned long long size)
 {
 	struct node *new_node = (struct node*)malloc(sizeof(struct node));
@@ -35,6 +37,11 @@ void add_node(unsigned long long size)
 		new_node->data[i] = 42;
 	}
 #endif
+
+	if ((counter++) % 2) {
+		free(new_node->data);
+		new_node->data = NULL;
+	}
 
 	list = new_node;
 }
@@ -65,6 +72,8 @@ int main(int argc, char **argv)
 	list = NULL;
 
 	pgsz = sysconf(_SC_PAGESIZE);
+
+	counter = 0;
 
 	logger = new StackLogger();
 
