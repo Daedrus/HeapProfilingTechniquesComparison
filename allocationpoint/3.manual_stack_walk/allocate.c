@@ -81,10 +81,25 @@ void print_list()
 	}
 }
 
+// Proper time diffing from http://www.guyrutenberg.com/2007/09/22/profiling-code-using-clock_gettime/
+void print_time_diff(timespec start, timespec end)
+{
+	timespec diff;
+
+	if ((end.tv_nsec-start.tv_nsec) < 0) {
+		diff.tv_sec = end.tv_sec - start.tv_sec - 1;
+		diff.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+	} else {
+		diff.tv_sec = end.tv_sec - start.tv_sec;
+		diff.tv_nsec = end.tv_nsec - start.tv_nsec;
+	}
+
+	printf("%lu\n", (diff.tv_sec * 1000000000) + diff.tv_nsec);
+}
+
 int main(int argc, char **argv)
 {
-	timespec start, end, diff;
-	unsigned long milis;
+	timespec start, end;
 	list = NULL;
 
 	pgsz = sysconf(_SC_PAGESIZE);
@@ -95,16 +110,7 @@ int main(int argc, char **argv)
 	allocate();
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	diff.tv_sec = end.tv_sec - start.tv_sec;
-	diff.tv_nsec = end.tv_nsec - start.tv_nsec;
-
-	milis = (diff.tv_sec * 1000000) + (diff.tv_nsec / 1000);
-
-	printf("%lu\n", milis);
-
-	//print_list();
-
-	//sleep(100);
+	print_time_diff(start, end);
 
 	return 0;
 }
