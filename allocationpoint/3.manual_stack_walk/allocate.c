@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <malloc.h>
+#include <sched.h>
 
 #include "allocate.h"
 
@@ -99,8 +100,13 @@ void print_time_diff(timespec start, timespec end)
 
 int main(int argc, char **argv)
 {
+	cpu_set_t mask;
 	timespec start, end;
 	list = NULL;
+
+	CPU_ZERO(&mask);
+	CPU_SET(0, &mask);
+	sched_setaffinity(0, sizeof(mask), &mask);
 
 	pgsz = sysconf(_SC_PAGESIZE);
 
