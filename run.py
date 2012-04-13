@@ -107,9 +107,9 @@ def process_results(nr_iterations):
 	allocation_point_differences = [x - allocation_point_averages[0] for x in allocation_point_averages]
 
 	plt.subplot(211)
-	plt.plot(allocation_size_differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
+	plt.plot(allocation_size_differences, marker='o', linestyle=':', color=[min(1, 0.2 + nr_iterations/float(1000000)) , 0, 0], label=str(nr_iterations))
 	plt.subplot(212)
-	plt.plot(allocation_point_differences, marker='o', linestyle=':', color=[0.2 + nr_iterations/float(1000000), 0, 0], label=str(nr_iterations))
+	plt.plot(allocation_point_differences, marker='o', linestyle=':', color=[min(1, 0.2 + nr_iterations/float(1000000)), 0, 0], label=str(nr_iterations))
 
 plt.figure(1)
 plot1 = plt.subplot(211)
@@ -120,11 +120,11 @@ plt.xlabel('test name')
 plt.ylabel('microseconds')
 plt.xticks(range(len(allocation_point_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_point_scenarios], size='large')
 
-run_test(1, 50000, 128, 128, 128)
-run_test(1, 100000, 128, 128, 128)
-run_test(1, 150000, 128, 128, 128)
-run_test(1, 200000, 128, 128, 128)
 run_test(1, 250000, 128, 128, 128)
+run_test(1, 500000, 128, 128, 128)
+run_test(1, 750000, 128, 128, 128)
+run_test(1, 1000000, 128, 128, 128)
+run_test(1, 1250000, 128, 128, 128)
 
 plt.legend(loc='upper center', fancybox=True, shadow=True, title='allocations')
 plt.show()
