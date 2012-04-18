@@ -18,9 +18,23 @@ class Scenario:
 	def __str__(self):
 		return self.name + ", " + self.path
 
+class Test:
+	test_id = 0
+
+	def __init__(self, max_depth, nr_iterations, start_size, end_size, step_size):
+		self.max_depth = max_depth
+		self.nr_iterations = nr_iterations
+		self.start_size = start_size
+		self.end_size = end_size
+		self.step_size = step_size
+		self.test_id = Test.test_id
+		Test.test_id = Test.test_id + 1
+
 basic_scenario = Scenario("0.basic", "./basic")
 allocation_size_scenarios = sorted([Scenario(x, os.path.join("./allocationsize/", x)) for x in os.listdir("./allocationsize")], key=lambda scenario: scenario.name)
 allocation_point_scenarios = sorted([Scenario(x, os.path.join("./allocationpoint/", x)) for x in os.listdir("./allocationpoint")], key=lambda scenario: scenario.name)
+
+markers = ('+', 'o', '*', 'x', '^')
 
 # From http://kogs-www.informatik.uni-hamburg.de/~meine/python_tricks
 def flatten(x):
@@ -75,21 +89,22 @@ def clean():
 	for scenario in allocation_point_scenarios:
 		call(["make", "clean", "-C", scenario.path])
 
-def run_test(max_depth, nr_iterations, start_size, end_size, step_size):
+#def run_test(max_depth, nr_iterations, start_size, end_size, step_size):
+def run_test(test):
 	defines = []
-	defines.append('MAX_DEPTH=' + str(max_depth) + ' ')
-	defines.append('NR_ITERATIONS=' + str(nr_iterations) + ' ')
-	defines.append('START_SIZE=' + str(start_size) + ' ')
-	defines.append('END_SIZE=' + str(end_size) + ' ')
-	defines.append('STEP_SIZE=' + str(step_size) + ' ')
+	defines.append('MAX_DEPTH=' + str(test.max_depth) + ' ')
+	defines.append('NR_ITERATIONS=' + str(test.nr_iterations) + ' ')
+	defines.append('START_SIZE=' + str(test.start_size) + ' ')
+	defines.append('END_SIZE=' + str(test.end_size) + ' ')
+	defines.append('STEP_SIZE=' + str(test.step_size) + ' ')
 
 	setup(defines)
 	run(20)
 	clean()
 
-	process_results(nr_iterations)
+	process_results(test)
 
-def process_results(nr_iterations):
+def process_results(test):
 	allocation_size_results = []
 	allocation_size_results.append(basic_scenario.results)
 	for scenario in allocation_size_scenarios:
@@ -107,25 +122,30 @@ def process_results(nr_iterations):
 	allocation_point_differences = [x - allocation_point_averages[0] for x in allocation_point_averages]
 
 	plt.subplot(211)
-	plt.plot(allocation_size_differences, marker='o', linestyle=':', color=[min(1, 0.2 + nr_iterations/float(1000000)) , 0, 0], label=str(nr_iterations))
+	plt.yticks(size='xx-large', weight='black')
+	plt.plot([x/float(1000) for x in allocation_size_differences], marker=markers[test.test_id], linewidth=2, linestyle=':', color=[min(1, 0.2 + test.test_id * 0.1), 0, 0], label=str(test.nr_iterations))
 	plt.subplot(212)
-	plt.plot(allocation_point_differences, marker='o', linestyle=':', color=[min(1, 0.2 + nr_iterations/float(1000000)), 0, 0], label=str(nr_iterations))
+	plt.plot([x/float(1000) for x in allocation_point_differences], marker=markers[test.test_id], linestyle=':', color=[min(1, 0.2 + test.test_id * 0.1), 0, 0], label=str(test.nr_iterations))
 
 plt.figure(1)
 plot1 = plt.subplot(211)
-plt.ylabel('microseconds')
-plt.xticks(range(len(allocation_size_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_size_scenarios], size='large')
+plt.ylabel('microseconds', fontsize='xx-large')
+plt.xticks(range(len(allocation_size_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_size_scenarios], size='xx-large', weight='black', rotation=13)
 plot2 = plt.subplot(212)
-plt.xlabel('test name')
-plt.ylabel('microseconds')
-plt.xticks(range(len(allocation_point_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_point_scenarios], size='large')
+plt.xlabel('test name', fontsize='xx-large')
+plt.ylabel('microseconds', fontsize='xx-large')
+plt.xticks(range(len(allocation_point_scenarios)+1), [basic_scenario.name]+[scenario.name for scenario in allocation_point_scenarios], size='xx-large', weight='black', rotation=13)
 
-run_test(1, 250000, 128, 128, 128)
-run_test(1, 500000, 128, 128, 128)
-run_test(1, 750000, 128, 128, 128)
-run_test(1, 1000000, 128, 128, 128)
-run_test(1, 1250000, 128, 128, 128)
+run_test(Test(1, 250000, 128, 128, 128))
+run_test(Test(1, 500000, 128, 128, 128))
+run_test(Test(1, 750000, 128, 128, 128))
+run_test(Test(1, 1000000, 128, 128, 128))
+run_test(Test(1, 1250000, 128, 128, 128))
 
-plt.legend(loc='upper center', fancybox=True, shadow=True, title='allocations')
+leg = plt.legend(loc='upper left', fancybox=True, shadow=True, title='Number of allocations')
+leg.get_title().set_fontsize('xx-large')
+for t in leg.get_texts():
+	t.set_fontsize('xx-large')
+
 plt.show()
 
